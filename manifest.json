@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "Pinboard",
+  "description": "Save current tab to pinboard.",
+  "version": "1.0",
+  "permissions": [
+    "tabs",
+    "*://*.pinboard.in/"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "browser_action": {
+    "default_icon": "theme/img/pin.png",
+    "default_popup": "debug.html"
+  }
+}

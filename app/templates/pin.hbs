@@ -1,0 +1,35 @@
+<div class="input-group">
+    <input tabindex="1" placeholder="Title" type="text" id="description" name="description" value="{{description}}">
+</div>
+
+<div class="input-group">
+    <input tabindex="2" placeholder="Site" type="text" id="url" name="url" value="{{url}}">
+</div>
+
+<div class="input-group">
+    <label for="tags">
+        Tags
+    </label>
+    <select tabindex="3" name="tags" data-placeholder="&nbsp;" multiple>
+    </select>
+</div>
+
+<div class="input-group inline">
+    <label for="toread">
+        Read
+        <input tabindex="4" class="ios-switch bigswitch" type="checkbox" id="toread" name="toread" {{#if toread}}checked{{/if}}>
+        <div><div></div></div>
+    </label>
+</div>
+
+<div class="input-group inline">
+    <label for="shared">
+        Share
+        <input tabindex="5" class="ios-switch bigswitch" type="checkbox" id="shared" name="shared" {{#if shared}}checked{{/if}}>
+        <div><div></div></div>
+    </label>
+</div>
+
+<div class="buttons inline">
+    <button tabindex="6" type="submit">Send</button>
+</div>
