@@ -1,5 +1,6 @@
 var Backbone = require('backbone'),
-    $ = require('jquery');
+    $ = require('jquery'),
+    moment = require('moment'),
     Pinboard = require('../library/pinboard.js'),
     PinModel = require('../models/pin.js'),
     PinTemplate = require('../templates/pin.hbs'),
@@ -20,7 +21,8 @@ module.exports = Backbone.View.extend({
     'focus input[type="checkbox"]': 'onCheckboxFocus',
     'blur input[type="checkbox"]': 'onCheckboxBlur',
     'keydown input[type="checkbox"]': 'onCheckboxEnter',
-    'submit': 'onSubmit'
+    'submit': 'onSubmit',
+    'click #use-suggested-tags': 'fillSuggested'
   },
 
   messages: [],
@@ -44,6 +46,10 @@ module.exports = Backbone.View.extend({
       self.tags.collection.on('ready', function(){
         self.tags.chosen();
       });
+
+      self.tags.collection.on('tags:suggested', function(tags){
+        if (tags.length > 0) self.$el.find('#use-suggested-tags').removeClass('hidden');
+      });
     });
   },
 
@@ -54,11 +60,45 @@ module.exports = Backbone.View.extend({
   listen: function() {
     this.model.on('save:error', this.onError);
     this.model.on('save:success', this.onSuccess);
+    this.model.on('change', this.renderChange);
   },
 
   render: function() {
     this.el.innerHTML = PinTemplate(this.model.toJSON());
     $('body').html(this.el);
+  },
+
+  renderChange: function() {
+    var self = this;
+
+    var keys = _.intersection(_.keys(this.model.changed), _.keys(this.model.defaults));
+    var data = _.pick(this.model.changed, keys);
+
+    _.each(keys, function(key){
+      var $el = self.$el.find('[name="'+ key +'"]');
+
+      if ($el.is('input[type="text"]')) {
+        $el.val(data[key]);
+
+      } else if ($el.is('input[type="checkbox"]')) {
+        $el.prop('checked', data[key]);
+
+      } else if ($el.is('select')) {
+        _.each(data[key], function(item){
+          var tag = self.tags.collection.findWhere({ tag: item });
+          if (tag) tag.set('selected', true);
+        });
+      }
+
+      // Special cases
+      if (key == 'existing') {
+        self.$el.find('button[type="submit"]').text(data.existing ? 'Update' : 'Save');
+      }
+
+      if (key == 'time') {
+        self.$el.find('#time').text('Created ' + moment(data.time).fromNow());
+      }
+    });
   },
 
   destroy: function() {
@@ -96,22 +136,33 @@ module.exports = Backbone.View.extend({
     this.model.save(this.serialize());
   },
 
-  // TODO: get flags to work
+  fillSuggested: function(e) {
+    e.preventDefault();
+
+    if (this.tags.collection.suggested.length > 0) {
+      this.$el.find('#use-suggested-tags').text('Do not use suggested');
+      this.tags.collection.add(this.tags.collection.suggested);
+      this.tags.collection.suggested = [];
+
+    } else {
+      this.$el.find('#use-suggested-tags').text('Use suggested');
+
+      var suggested = this.tags.collection.filter(function(tag){
+        return tag.get('suggested');
+      });
+
+      this.tags.collection.suggested = suggested;
+      this.tags.collection.remove(suggested);
+    }
+
+    this.tags.refreshChosen();
+  },
+
   serialize: function() {
     var base = _.object(_.map(this.$el.serializeArray(), _.values));
-
-    var tags = this.tags.collection.filter(function(model){
-      return model.get('selected') == true;
-    });
-
-    var tagNames = _.compact(_.map(tags, function(tag){
-      console.log(tag);
-      if (! tag.get ) return;
-      return tag.get('tag');
-    }));
-
-    console.log(tagNames);
-    base.tags = tagNames;
+    base.toread = this.$el.find('[name="toread"]').prop('checked') == true ? 'yes' : 'no';
+    base.shared = this.$el.find('[name="shared"]').prop('checked') == true ? 'yes' : 'no';
+    base.tags = this.tags.serialize();
     return base;
   },
 
@@ -137,14 +188,11 @@ module.exports = Backbone.View.extend({
       message: 'Sending ...'
     });
 
-    this.$el.find('input textarea select button').attr('disabled', true);
     this.$el.find('button[type="submit"]').text('Sending ... ');
   },
 
   unsetSubmitting: function() {
     this.resetMessages();
-
-    this.$el.find('input textarea select button').attr('disabled', false);
     this.$el.find('button[type="submit"]').text('Send');
   },
 

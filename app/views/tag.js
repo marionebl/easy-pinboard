@@ -21,11 +21,11 @@ module.exports = Backbone.View.extend({
     if (! this.model.get('tag')) return;
 
     var text = this.model.get('tag');
-    var append = (this.model.get('suggested')) ? '★' : this.model.get('count');
+    this.$el.attr('selected', this.model.get('isNew') || this.model.get('selected') || this.model.get('suggested'));
 
-    this.$el.attr('data-count', append);
-    this.$el.attr('selected', this.model.get('isNew') || this.model.get('selected'));
+    if (this.model.get('suggested')) this.$el.addClass('suggested');
     this.$el.text(text);
+    this.$el.attr('value', text);
   },
 
   destroy: function() {

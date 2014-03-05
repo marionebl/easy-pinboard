@@ -13,10 +13,11 @@ module.exports = BaseModel.extend({
     dt: new Date(),
     replace: true,
     shared: false,
-    toread: false
+    toread: false,
+    time: null,
+    existing: false
   },
 
-  // TODO: check for existing bookmarks
   initialize: function(callback) {
     _.bindAll(this);
 
@@ -24,15 +25,18 @@ module.exports = BaseModel.extend({
     var user = window.app.getUser();
     this.pinboard = new Pinboard(user.user, user.apiToken);
 
+
     this.getCurrentTitle(function(title){
       self.set('description', title);
-
-      self.getCurrentUrl(function(url){
-        self.set('url', url);
-        self.trigger('ready', self);
-        callback(self);
-      });
     });
+
+    this.getCurrentUrl(function(url){
+      self.set('url', url);
+
+      self.getExisting(url, function(){});
+    });
+
+    callback(this);
   },
 
   getCurrentUrl: function(callback) {
@@ -55,11 +59,27 @@ module.exports = BaseModel.extend({
     }
   },
 
+  getExisting: function(url, callback) {
+    var self = this;
+
+    this.pinboard.get(url, function(response){
+      if (response.posts && response.posts.length > 0) {
+        var post = response.posts[0];
+
+        post.toread = post.toread == 'yes';
+        post.shared = post.shared == 'yes';
+        post.tags = post.tags.split(' ');
+        post.existing = true;
+
+        self.set(post);
+      }
+      callback(post);
+    });
+  },
+
   save: function(data) {
     var self = this;
-    this.set(_.omit(data));
-
-    var additionals = _.omit(this.toJSON(), 'url', 'description');
+    var additionals = _.omit(data, 'url', 'description');
 
     additionals = _.map(additionals, function(value, name){
       return {

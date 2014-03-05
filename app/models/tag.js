@@ -6,6 +6,7 @@ module.exports = BaseModel.extend({
   defaults: {
     tag: null,
     count: 0,
+    selected: false,
     suggested: false
   }
 });

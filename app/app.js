@@ -33,7 +33,7 @@ app = {
     });
 
     this.view.on('save:success', function(){
-      //_.delay(self.close, 2000);
+      _.delay(self.close, 2000);
     });
   },
 

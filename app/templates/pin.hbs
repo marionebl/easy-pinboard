@@ -1,35 +1,45 @@
 <div class="input-group">
-    <input tabindex="1" placeholder="Title" type="text" id="description" name="description" value="{{description}}">
+    <input placeholder="Title" type="text" id="description" name="description" value="{{description}}">
 </div>
 
 <div class="input-group">
-    <input tabindex="2" placeholder="Site" type="text" id="url" name="url" value="{{url}}">
+    <input placeholder="Site" type="text" id="url" name="url" value="{{url}}">
 </div>
 
 <div class="input-group">
     <label for="tags">
-        Tags
+        Tags <button class="text-button small affirmative hidden" id="use-suggested-tags">Use suggested</button>
     </label>
-    <select tabindex="3" name="tags" data-placeholder="&nbsp;" multiple>
+    <select autofocus="autofocus" name="tags" data-placeholder="&nbsp;" multiple>
     </select>
 </div>
 
 <div class="input-group inline">
-    <label for="toread">
-        Read
-        <input tabindex="4" class="ios-switch bigswitch" type="checkbox" id="toread" name="toread" {{#if toread}}checked{{/if}}>
+    <label>
+        To read
+        <input class="ios-switch bigswitch" type="checkbox" id="toread" name="toread" {{#if toread}}checked{{/if}}>
         <div><div></div></div>
     </label>
 </div>
 
 <div class="input-group inline">
-    <label for="shared">
+    <label>
         Share
-        <input tabindex="5" class="ios-switch bigswitch" type="checkbox" id="shared" name="shared" {{#if shared}}checked{{/if}}>
+        <input class="ios-switch bigswitch" type="checkbox" id="shared" name="shared" {{#if shared}}checked{{/if}}>
         <div><div></div></div>
     </label>
 </div>
 
-<div class="buttons inline">
-    <button tabindex="6" type="submit">Send</button>
+<div id="time">
+
+</div>
+
+<div class="buttons">
+    <button type="submit">
+    {{#if existing}}
+        Update
+    {{else}}
+        Save
+    {{/if}}
+    </button>
 </div>

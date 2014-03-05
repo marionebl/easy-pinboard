@@ -150,6 +150,27 @@ Pinboard.prototype.list_posts = function (callback, params, async) {
 }
 
 /**
+ *	Get one of the user's posts
+ *
+ *	@param {Function} callback - Returns the posts JSON
+ *	@param {Array} [params] - /posts/all optinal parameters ({"name": "", "value": ""} format)
+ */
+Pinboard.prototype.get = function (url, callback) {
+  this.request("GET", "/posts/get", [{ name: 'url', value: url }], null, function (status, response) {
+    if (status === 200) {
+      // Got your posts
+      callback(response);
+    } else if (status === 429) {
+      // Stop requesting!
+      callback(null, {
+        status: status,
+        message: "Too many requests. Try again in 5 minutes."
+      });
+    }
+  }, true);
+}
+
+/**
  *	Add a new bookmark
  *
  *	@param {String} url - URL to bookmark
