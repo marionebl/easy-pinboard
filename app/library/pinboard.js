@@ -94,12 +94,14 @@ Pinboard.prototype.request = function (method, api_method, params, body, statech
  *	@param {Function} callback(auth_token, error) - Returns the authentication token or a error
  */
 Pinboard.prototype.login = function (password, callback) {
-  var url = this.proxy + "https://" + this.username + ":" + password + "@api.pinboard.in/v1/user/api_token/?format=json";
+  var url = this.proxy + "https://api.pinboard.in/v1/user/api_token/?format=json";
   var req = new XMLHttpRequest();
   var outer_scope = this;
 
+  //" + this.username + ":" + password + "@
+
   if (this.encode_url) {
-    url = this.proxy + encodeURIComponent("https://" + this.username + ":" + password + "@api.pinboard.in/v1/user/api_token/?format=json");
+    url = this.proxy + encodeURIComponent("https://api.pinboard.in/v1/user/api_token/?format=json");
   }
 
   req.onreadystatechange = function () {
@@ -121,6 +123,7 @@ Pinboard.prototype.login = function (password, callback) {
   };
 
   req.open("GET", url, true);
+  req.setRequestHeader('Authorization', 'Basic ' + btoa([this.username, password].join(':')));
   req.send(null);
 }
 
